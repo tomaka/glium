@@ -12,11 +12,11 @@ use TextureMipmapExt;
 use version::Api;
 use Rect;
 
-use image_format::{self, TextureFormatRequest, ClientFormatAny};
 use texture::Texture2dDataSink;
 use texture::TextureKind;
 use texture::{MipmapsOption, TextureFormat, TextureCreationError, CubeLayer};
 use texture::{get_format, InternalFormat, GetFormatError};
+use image_format::{self, ClientFormatAny, TextureFormatRequest, UncompressedFloatFormat};
 use texture::pixel::PixelValue;
 use texture::pixel_buffer::PixelBuffer;
 
@@ -178,6 +178,15 @@ pub fn new_texture<'a, F: ?Sized, P>(facade: &F, format: TextureFormatRequest,
         (&None, TextureFormatRequest::Specific(TextureFormat::DepthFormat(_))) => (gl::DEPTH_COMPONENT, gl::FLOAT),
         (&None, TextureFormatRequest::AnyDepthStencil) => (gl::DEPTH_STENCIL, gl::UNSIGNED_INT_24_8),
         (&None, TextureFormatRequest::Specific(TextureFormat::DepthStencilFormat(_))) => (gl::DEPTH_STENCIL, gl::UNSIGNED_INT_24_8),
+        (&None, TextureFormatRequest::Specific(TextureFormat::UncompressedFloat(format))) => {
+            match format {
+                UncompressedFloatFormat::U8 => (gl::RED, gl::UNSIGNED_BYTE),
+                UncompressedFloatFormat::U8U8 => (gl::RG, gl::UNSIGNED_BYTE),
+                UncompressedFloatFormat::U8U8U8 => (gl::RGB, gl::UNSIGNED_BYTE),
+                UncompressedFloatFormat::U8U8U8U8 => (gl::RGBA, gl::UNSIGNED_BYTE),
+                _ => (gl::RGBA, gl::UNSIGNED_BYTE),
+            }
+        }
         (&None, _) => (gl::RGBA, gl::UNSIGNED_BYTE),
     };
 
